@@ -1,7 +1,9 @@
 import re
 from collections import defaultdict, OrderedDict
 import json
-from crawler import read_course, COURSE_IDS, read_lines
+from .crawler import read_course, COURSE_IDS, read_lines
+
+COURSE_LIST_FILENAME = 'course_list.json'
 
 hebrew = ['שם מקצוע', 'מספר מקצוע', 'אתר הקורס', 'נקודות',
           'הרצאה', 'תרגיל', 'מעבדה', 'סמינר/פרויקט', 'סילבוס', 'מקצועות זהים', 'מקצועות קדם', 'מקצועות צמודים', 'מקצועות ללא זיכוי נוסף', 'מקצועות ללא זיכוי נוסף (מכילים)' , 'מקצועות ללא זיכוי נוסף (מוכלים)',
@@ -11,7 +13,7 @@ english = 'name id site points lecture tutorial lab project syllabus identical k
 trans = dict(zip(hebrew, english))
 
 
-FAILED = frozenset(read_lines('failed.txt'))
+FAILED = frozenset(read_lines('data/failed.txt'))
 
 
 def extract_info(html):
@@ -88,7 +90,7 @@ def run_exactly(numbers):
         yield num, fetch_course(num)
         
 def main():
-    with open('course_list.txt', 'w', encoding='utf8') as out, open('failed.txt', 'a') as FAILED:
+    with open(COURSE_LIST_FILENAME, 'w', encoding='utf8') as out, open('data/failed.txt', 'a') as FAILED:
         numbers = COURSE_IDS
         out.write('{\n')
         for num, d in run_exactly(numbers):
@@ -104,7 +106,7 @@ def main():
         out.write('\n}')
 
 
-def read_json(filename='course_list.json'):
+def read_json(filename=COURSE_LIST_FILENAME):
     with open(filename, encoding='utf8') as f:
         return json.load(f)
 

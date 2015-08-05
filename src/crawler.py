@@ -13,8 +13,8 @@ def write_lines(filename, iterable):
             print(t, file=out)
 
 
-FACULTIES = read_lines('faculties.txt')
-SUB_FACULTIES = read_lines('sub_faculties.txt')
+FACULTIES = read_lines('data/faculties.txt')
+SUB_FACULTIES = read_lines('data/sub_faculties.txt')
 COURSE_IDS = read_lines('course_ids.txt') 
 
 def get_form(**kwargs):
