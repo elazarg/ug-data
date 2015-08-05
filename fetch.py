@@ -1,7 +1,7 @@
 import re
 from collections import defaultdict, OrderedDict
 import json
-from crowler import read_course, COURSE_IDS, read_lines
+from crawler import read_course, COURSE_IDS, read_lines
 
 hebrew = ['שם מקצוע', 'מספר מקצוע', 'אתר הקורס', 'נקודות', 
           'הרצאה', 'תרגיל', 'מעבדה', 'סמינר/פרויקט', 'סילבוס',  'מקצועות זהים','מקצועות קדם','מקצועות צמודים', 'מקצועות ללא זיכוי נוסף', 'מקצועות ללא זיכוי נוסף (מכילים)' ,'מקצועות ללא זיכוי נוסף (מוכלים)',
