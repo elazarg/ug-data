@@ -11,7 +11,7 @@ english = 'name id site points lecture tutorial lab project syllabus identical k
 trans = dict(zip(hebrew, english))
 
 
-failed = frozenset(read_lines('failed.txt'))
+FAILED = frozenset(read_lines('failed.txt'))
 
 
 def extract_info(html):
@@ -36,8 +36,13 @@ def cleanup(raw_dict):
     od = OrderedDict((trans[k], fix(trans[k], v)) 
                        for k,v in raw_dict.items() 
                        if trans[k] not in irrelevant)
+    if not od:
+        return {}
+    if 'points' in od:
+        od.move_to_end('points', last=False)
     od.move_to_end('id', last=False)
-    od.move_to_end('site')
+    if 'site' in od:
+        od.move_to_end('site')
     od.move_to_end('syllabus')
     return od
 
@@ -58,34 +63,39 @@ def format_tsv(d):
     print(header.format(**d))
 
 
-def run(numbers):
-    numbers = set(numbers) - failed
-    seen = set()
+def run_propagate(numbers):
+    seen = set(FAILED)
+    numbers = set(numbers) - seen
     while numbers:
         num = numbers.pop()
         seen.add(num)
         try:
             d = fetch_course(num)
             yield num, d
+        except BaseException as ex:
+            print('Error for id', num, type(ex))
+        else:
             if d:
                 courses = set(sum(d.get('kdam',[]), []) + sum(d.get('adjacent', []), []) + 
                               sum([d.get(x, []) for x in 'identical no_more no_more_contains no_more_included'.split()], [])) 
                 numbers.update(courses - seen)
-        except:
-            print('Error for id', num)
 
 
+def run_exactly(numbers):
+    for num in numbers:
+        yield num, fetch_course(num)
+        
 def main():
-    with open('course_list.txt', 'w', encoding='utf8') as out, open('failed.txt', 'a') as failed:
+    with open('course_list.txt', 'w', encoding='utf8') as out, open('failed.txt', 'a') as FAILED:
         numbers = COURSE_IDS
-        for num, d in run(numbers):
+        for num, d in run_exactly(numbers):
             #print(num, end=': ')
             if d:
                 #print(format_json(d))
                 format_json(d, out)
                 out.write('\n')
             else:
-                print(num, file=failed)
+                print(num, file=FAILED)
                 #print('non existent')
 
 if __name__ == '__main__':
