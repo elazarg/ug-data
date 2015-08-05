@@ -33,10 +33,13 @@ def fix(k, v):
 
 
 def cleanup(raw_dict):
-    return OrderedDict((trans[k], fix(trans[k], v)) 
+    od = OrderedDict((trans[k], fix(trans[k], v)) 
                        for k,v in raw_dict.items() 
                        if trans[k] not in irrelevant)
-
+    od.move_to_end('id', last=False)
+    od.move_to_end('site')
+    od.move_to_end('syllabus')
+    return od
 
 def fetch_course(number):
     return cleanup(extract_info(read_course(number)))

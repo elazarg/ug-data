@@ -1,10 +1,17 @@
 import urllib.request as request
 import urllib.parse as parse
 import re
-import itertools
 
 def read_lines(filename):
-    with open(filename) as f: return tuple(line.strip() for line in f)
+    with open(filename) as f:
+        return tuple(line.strip() for line in f)
+
+
+def write_lines(filename, iterable):
+    with open(filename, 'w', encoding='utf8') as out:
+        for t in iterable:
+            print(t, file=out)
+
 
 FACULTIES = read_lines('faculties.txt')
 SUB_FACULTIES = read_lines('sub_faculties.txt')
@@ -76,8 +83,3 @@ def enumerate_courses():
             if 'Error Message' not in read_course(course_id):
                 yield course_id
 
-
-with open('course_ids.txt', 'w') as out:
-    for c in enumerate_courses():
-        print(c, file=out)
-        print(c)
