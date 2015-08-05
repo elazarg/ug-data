@@ -51,9 +51,11 @@ def fetch_course(number):
 
 
 def format_json(d, fp=None):
+    j = {d['id']:d}
+    del d['id']
     if fp is None:
-        return json.dumps(d, ensure_ascii=False)
-    json.dump(d, fp, ensure_ascii=False)
+        return json.dumps(j, ensure_ascii=False)
+    json.dump(j, fp, ensure_ascii=False)
 
 
 def format_tsv(d):
@@ -88,15 +90,24 @@ def run_exactly(numbers):
 def main():
     with open('course_list.txt', 'w', encoding='utf8') as out, open('failed.txt', 'a') as FAILED:
         numbers = COURSE_IDS
+        out.write('{\n')
         for num, d in run_exactly(numbers):
             #print(num, end=': ')
             if d:
                 #print(format_json(d))
                 format_json(d, out)
-                out.write('\n')
+                out.write(',\n')
             else:
                 print(num, file=FAILED)
                 #print('non existent')
+        format_json({"id":"000000"}, out)
+        out.write('\n}')
+
+
+def read_json(filename='course_list.json'):
+    with open(filename, encoding='utf8') as f:
+        return json.load(f)
+
 
 if __name__ == '__main__':
     main()
