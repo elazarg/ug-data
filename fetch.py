@@ -1,7 +1,8 @@
-import urllib.request as u
 import re
 from collections import defaultdict, OrderedDict
 import json
+from crowler import fetch
+import crowler
 
 hebrew = ['שם מקצוע', 'מספר מקצוע', 'אתר הקורס', 'נקודות', 
           'הרצאה', 'תרגיל', 'מעבדה', 'סמינר/פרויקט', 'סילבוס',  'מקצועות זהים','מקצועות קדם','מקצועות צמודים', 'מקצועות ללא זיכוי נוסף', 'מקצועות ללא זיכוי נוסף (מכילים)' ,'מקצועות ללא זיכוי נוסף (מוכלים)',
@@ -11,15 +12,7 @@ english = 'name id site points lecture tutorial lab project syllabus identical k
 trans = dict(zip(hebrew, english))
 
 
-def fetch(url):
-    with u.urlopen(url) as w:
-        return w.read().decode('utf8')
-
-
-def fetch_numbers():
-    txt = fetch('http://www.cs.technion.ac.il/he/courses/all/by-number/')
-    return set(re.findall('23[46]\d{3}', txt))
-
+failed = frozenset(crowler.read_lines('failed.txt'))
 
 def read_course(number):
     return fetch("https://ug3.technion.ac.il/rishum/course/{}".format(number))
@@ -67,31 +60,34 @@ def format_tsv(d):
 
 
 def run(numbers):
+    numbers = set(numbers) - failed
     seen = set()
     while numbers:
         num = numbers.pop()
         seen.add(num)
-        d = fetch_course(num)
-        yield num, d
-        if d:
-            courses = set(sum(d.get('kdam',[]), []) + sum(d.get('adjacent', []), []) + 
-                      sum([d.get(x, []) for x in 'identical no_more no_more_contains no_more_included'.split()], [])) 
-            numbers.update(courses - seen)
+        try:
+            d = fetch_course(num)
+            yield num, d
+            if d:
+                courses = set(sum(d.get('kdam',[]), []) + sum(d.get('adjacent', []), []) + 
+                              sum([d.get(x, []) for x in 'identical no_more no_more_contains no_more_included'.split()], [])) 
+                numbers.update(courses - seen)
+        except:
+            print('Error for id', num)
 
 
 def main():
     with open('course_list.txt', 'w', encoding='utf8') as out, open('failed.txt', 'a') as failed:
-        numbers = fetch_numbers()
-        print(numbers)
+        numbers = crowler.COURSE_IDS
         for num, d in run(numbers):
             #print(num, end=': ')
-            if not d:
+            if d:
+                #print(format_json(d))
+                format_json(d, out)
+                out.write('\n')
+            else:
                 print(num, file=failed)
                 #print('non existent')
-                continue
-            #print(format_json(d))
-            format_json(d, out)
-            out.write('\n')
 
 if __name__ == '__main__':
     main()
