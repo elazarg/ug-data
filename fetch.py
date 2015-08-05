@@ -1,8 +1,7 @@
 import re
 from collections import defaultdict, OrderedDict
 import json
-from crowler import fetch
-import crowler
+from crowler import read_course, COURSE_IDS, read_lines
 
 hebrew = ['שם מקצוע', 'מספר מקצוע', 'אתר הקורס', 'נקודות', 
           'הרצאה', 'תרגיל', 'מעבדה', 'סמינר/פרויקט', 'סילבוס',  'מקצועות זהים','מקצועות קדם','מקצועות צמודים', 'מקצועות ללא זיכוי נוסף', 'מקצועות ללא זיכוי נוסף (מכילים)' ,'מקצועות ללא זיכוי נוסף (מוכלים)',
@@ -12,10 +11,7 @@ english = 'name id site points lecture tutorial lab project syllabus identical k
 trans = dict(zip(hebrew, english))
 
 
-failed = frozenset(crowler.read_lines('failed.txt'))
-
-def read_course(number):
-    return fetch("https://ug3.technion.ac.il/rishum/course/{}".format(number))
+failed = frozenset(read_lines('failed.txt'))
 
 
 def extract_info(html):
@@ -78,7 +74,7 @@ def run(numbers):
 
 def main():
     with open('course_list.txt', 'w', encoding='utf8') as out, open('failed.txt', 'a') as failed:
-        numbers = crowler.COURSE_IDS
+        numbers = COURSE_IDS
         for num, d in run(numbers):
             #print(num, end=': ')
             if d:

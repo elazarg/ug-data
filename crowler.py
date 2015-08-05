@@ -7,6 +7,7 @@ def read_lines(filename):
     with open(filename) as f: return tuple(line.strip() for line in f)
 
 FACULTIES = read_lines('faculties.txt')
+SUB_FACULTIES = read_lines('sub_faculties.txt')
 COURSE_IDS = read_lines('course_ids.txt') 
 
 def get_form(**kwargs):
@@ -35,14 +36,18 @@ def fetch(url):
     with request.urlopen(url) as w:
         return w.read().decode('utf8')
     
-    
+
+def read_course(number):
+    return fetch("https://ug3.technion.ac.il/rishum/course/{}".format(number))
+
+
 def get_courses_by(**kwargs):
     d = get_form(**kwargs)
     URL = 'https://ug3.technion.ac.il/rishum/search'
     data = bytes(parse.urlencode(d), encoding='utf8')
     with request.urlopen(URL, data=data) as w:
         html = w.read().decode('utf8')
-        # print(html)
+        #print(html)
     if 'class="error-msg"' in html:
         raise RuntimeError('Bad results for ' + str(kwargs))
     return re.findall(r'>(\d{6})</a>', html)
@@ -55,11 +60,24 @@ def enumerate_faculties():
         except:
             pass
         else:
-            print(str(i).zfill(2))
+            yield str(i).zfill(2)
+
+def enumerate_sub_faculties():
+    for fac in FACULTIES:
+        try:
+            yield from set(x[:3] for x in get_courses_by(FAC=fac))
+        except RuntimeError:
+            pass
+
+def enumerate_courses(): 
+    for sub_f in SUB_FACULTIES:
+        for i in range(1000):
+            course_id = '{}{}'.format(sub_f, str(i).zfill(3))
+            if 'Error Message' not in read_course(course_id):
+                yield course_id
 
 
-def enumerate_courses():
-    cs = set(itertools.chain.from_iterable(get_courses_by(FAC=fac) for fac in FACULTIES)) 
-    with open('course_ids.txt', 'w') as out:
-        for c in sorted(cs):
-            print(c, file=out)
+with open('course_ids.txt', 'w') as out:
+    for c in enumerate_courses():
+        print(c, file=out)
+        print(c)
