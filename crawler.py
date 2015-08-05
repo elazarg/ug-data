@@ -54,7 +54,7 @@ def get_courses_by(**kwargs):
     data = bytes(parse.urlencode(d), encoding='utf8')
     with request.urlopen(URL, data=data) as w:
         html = w.read().decode('utf8')
-        #print(html)
+        # print(html)
     if 'class="error-msg"' in html:
         raise RuntimeError('Bad results for ' + str(kwargs))
     return re.findall(r'>(\d{6})</a>', html)

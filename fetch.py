@@ -3,9 +3,9 @@ from collections import defaultdict, OrderedDict
 import json
 from crawler import read_course, COURSE_IDS, read_lines
 
-hebrew = ['שם מקצוע', 'מספר מקצוע', 'אתר הקורס', 'נקודות', 
-          'הרצאה', 'תרגיל', 'מעבדה', 'סמינר/פרויקט', 'סילבוס',  'מקצועות זהים','מקצועות קדם','מקצועות צמודים', 'מקצועות ללא זיכוי נוסף', 'מקצועות ללא זיכוי נוסף (מכילים)' ,'מקצועות ללא זיכוי נוסף (מוכלים)',
-          'עבור לסמסטר', 'אחראים', 'הערות','מועד הבחינה', 'מועד א', 'מועד ב', 'מיקום']
+hebrew = ['שם מקצוע', 'מספר מקצוע', 'אתר הקורס', 'נקודות',
+          'הרצאה', 'תרגיל', 'מעבדה', 'סמינר/פרויקט', 'סילבוס', 'מקצועות זהים', 'מקצועות קדם', 'מקצועות צמודים', 'מקצועות ללא זיכוי נוסף', 'מקצועות ללא זיכוי נוסף (מכילים)' , 'מקצועות ללא זיכוי נוסף (מוכלים)',
+          'עבור לסמסטר', 'אחראים', 'הערות', 'מועד הבחינה', 'מועד א', 'מועד ב', 'מיקום']
 irrelevant = 'move_to_semester in_charge comments exam_date exam_A exam_B location'.split()
 english = 'name id site points lecture tutorial lab project syllabus identical kdam adjacent no_more no_more_contains no_more_included'.split() + irrelevant
 trans = dict(zip(hebrew, english))
@@ -34,7 +34,7 @@ def fix(k, v):
 
 def cleanup(raw_dict):
     od = OrderedDict((trans[k], fix(trans[k], v)) 
-                       for k,v in raw_dict.items() 
+                       for k, v in raw_dict.items() 
                        if trans[k] not in irrelevant)
     if not od:
         return {}
@@ -61,7 +61,7 @@ def format_json(d, fp=None):
 def format_tsv(d):
     d = defaultdict(str, d)
     header = '{id}\t{points}\t{kdam}\t{adjacent}\t{name}'
-    print(header.replace('{','').replace('}',''))
+    print(header.replace('{', '').replace('}', ''))
     print(header.format(**d))
 
 
@@ -78,7 +78,7 @@ def run_propagate(numbers):
             print('Error for id', num, type(ex))
         else:
             if d:
-                courses = set(sum(d.get('kdam',[]), []) + sum(d.get('adjacent', []), []) + 
+                courses = set(sum(d.get('kdam', []), []) + sum(d.get('adjacent', []), []) + 
                               sum([d.get(x, []) for x in 'identical no_more no_more_contains no_more_included'.split()], [])) 
                 numbers.update(courses - seen)
 
@@ -92,14 +92,14 @@ def main():
         numbers = COURSE_IDS
         out.write('{\n')
         for num, d in run_exactly(numbers):
-            #print(num, end=': ')
+            # print(num, end=': ')
             if d:
-                #print(format_json(d))
+                # print(format_json(d))
                 format_json(d, out)
                 out.write(',\n')
             else:
                 print(num, file=FAILED)
-                #print('non existent')
+                # print('non existent')
         format_json({"id":"000000"}, out)
         out.write('\n}')
 
