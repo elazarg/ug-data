@@ -12,21 +12,37 @@ def read_json_to_dict(filename=COURSE_LIST_FILENAME):
 
 
 def flatten(v, field):
-    val = v.get(field, [])
-    return sum(val, [])
+    return sum(v.get(field, []), [])
 
 
-def reverse_dict(pairs):
-    res = defaultdict(set)
+def to_jsonable(d):
+    return {k:list(sorted(set(v))) for k,v in d.items()}
+
+
+def multidict(pairs):
+    res = defaultdict(list)
     for k, v in it.chain.from_iterable(pairs):
-        res[v].add(k)
-    return {k:list(v) for k,v in res.items()}
+        res[k].append(v)
+    return to_jsonable(res)
+
+
+def merge_mutildicts(d1, d2):
+    res = defaultdict(list, d1)
+    for (k, v) in d2.items():
+        res[k] += v
+    return to_jsonable(res)
 
 
 def get_reverse_kdam_from_course_list(field='kdam', filename=COURSE_LIST_FILENAME):
     d = read_json_to_dict(filename)
-    return reverse_dict(it.product([k], flatten(v, field))
+    return multidict(it.product(flatten(v, field), [k])
                         for k, v in d.items())
+
+
+def read_kdam_and_adjacent():
+    kdams = read_json_to_dict(REVERSE_KDAM_FILENAME)
+    adjacents = read_json_to_dict(REVERSE_ADJACENT_FILENAME)
+    return merge_mutildicts(kdams, adjacents)
 
 
 def dump_json_kdam(d):
@@ -34,6 +50,9 @@ def dump_json_kdam(d):
     return ('{\n%s\n}' % s.replace("'", '"'))
 
 
+def print_to_file(filename, field):
+    with open(filename, 'w') as f:
+        f.write(dump_json_kdam(get_reverse_kdam_from_course_list(field)))
+        
 if __name__ == '__main__':
-    with open(REVERSE_ADJACENT_FILENAME, 'w') as f:
-        f.write(dump_json_kdam(get_reverse_kdam_from_course_list('adjacent')))
+    print(read_kdam_and_adjacent())
