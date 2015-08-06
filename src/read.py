@@ -33,6 +33,9 @@ def merge_mutildicts(d1, d2):
     return to_jsonable(res)
 
 
+def multidict_to_pairs(d):
+    return it.chain.from_iterable(it.product([k], v) for k,v in d.items())
+
 def get_reverse_kdam_from_course_list(field='kdam', filename=COURSE_LIST_FILENAME):
     d = read_json_to_dict(filename)
     return multidict(it.product(flatten(v, field), [k])
@@ -55,4 +58,6 @@ def print_to_file(filename, field):
         f.write(dump_json_kdam(get_reverse_kdam_from_course_list(field)))
         
 if __name__ == '__main__':
-    print(read_kdam_and_adjacent())
+    for kv in multidict_to_pairs(read_json_to_dict(REVERSE_KDAM_FILENAME)):
+        print(kv)
+        
