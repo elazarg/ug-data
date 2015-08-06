@@ -11,14 +11,23 @@ def read_json_to_dict(filename=COURSE_LIST_FILENAME):
         return json.load(f)
 
 
-def get_reverse_kdam_from_course_list():
-    d = read_json_to_dict()
-    rev_kdam_pairs = (it.product(sum(v.get('kdam', []), []), [k])
-                      for k,v in d.items())
+def flatten(v, field):
+    val = v.get(field, [])
+    return sum(val, [])
+
+
+def reverse_dict(pairs):
     res = defaultdict(set)
-    for k, v in it.chain.from_iterable(rev_kdam_pairs):
-        res[k].add(v)
+    for k, v in it.chain.from_iterable(pairs):
+        res[v].add(k)
     return {k:list(v) for k,v in res.items()}
 
+
+def get_reverse_kdam_from_course_list(field='kdam', filename=COURSE_LIST_FILENAME):
+    d = read_json_to_dict(filename)
+    return reverse_dict(it.product([k], flatten(v, field))
+                        for k, v in d.items())
+
+
 if __name__ == '__main__':
-    print(read_json_to_dict(REVERSE_KDAM_FILENAME))
+    print(get_reverse_kdam_from_course_list('adjacent'))
