@@ -2,8 +2,7 @@ import re
 from collections import defaultdict, OrderedDict
 import json
 from .crawler import read_course, COURSE_IDS, read_lines
-
-COURSE_LIST_FILENAME = 'course_list.json'
+from .read import COURSE_LIST_FILENAME
 
 hebrew = ['שם מקצוע', 'מספר מקצוע', 'אתר הקורס', 'נקודות',
           'הרצאה', 'תרגיל', 'מעבדה', 'סמינר/פרויקט', 'סילבוס', 'מקצועות זהים', 'מקצועות קדם', 'מקצועות צמודים', 'מקצועות ללא זיכוי נוסף', 'מקצועות ללא זיכוי נוסף (מכילים)' , 'מקצועות ללא זיכוי נוסף (מוכלים)',
@@ -104,12 +103,6 @@ def main():
                 # print('non existent')
         format_json({"id":"000000"}, out)
         out.write('\n}')
-
-
-def read_json(filename=COURSE_LIST_FILENAME):
-    with open(filename, encoding='utf8') as f:
-        return json.load(f)
-
 
 if __name__ == '__main__':
     main()
