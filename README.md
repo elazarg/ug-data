@@ -4,7 +4,7 @@ This project is about publishing Technion UG courses information in a machine-fr
 The code here is not important. Really. It's all about the data.
 [`course_list.json`](course_list.json) is a valid [JSON](https://en.wikipedia.org/wiki/JSON#Example) file containing information about courses in the Technion. Please take a look at it: as a JSON file, it's human-readable. Another interesting file is [`reverse_kdam.json`](reverse_kdam.json).
 
-It is also machine-readable, of course. To read this file and use it in your program, simply load it as a JSON file. For example, in Python your code can be:
+JSON is also machine-readable, of course. To read this file and use it in your program, simply load it as a JSON file. For example, in Python your code can be:
 
 ```python
 with open('course_list.json', encoding='utf8') as f:
