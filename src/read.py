@@ -58,6 +58,8 @@ def print_to_file(filename, field):
         f.write(dump_json_kdam(get_reverse_kdam_from_course_list(field)))
         
 if __name__ == '__main__':
-    for kv in multidict_to_pairs(read_json_to_dict(REVERSE_KDAM_FILENAME)):
-        print(kv)
+    for k, v in multidict_to_pairs(read_json_to_dict(REVERSE_ADJACENT_FILENAME)):
+        if k.startswith('234') or v.startswith('234'):
+            k, v = int(k), int(v)
+            print('{', 'from: {}, to: {}, arrows: "to",  dashes:true'.format(k, v), '},')
         
