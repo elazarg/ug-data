@@ -1,6 +1,7 @@
 import json
 import itertools as it
 from collections import defaultdict
+import textwrap
 
 COURSE_LIST_FILENAME = 'course_list.json'
 REVERSE_KDAM_FILENAME = 'reverse_kdam.json'
@@ -56,10 +57,24 @@ def dump_json_kdam(d):
 def print_to_file(filename, field):
     with open(filename, 'w') as f:
         f.write(dump_json_kdam(get_reverse_kdam_from_course_list(field)))
-        
+
+
+def kdam_to_visDataSet():
+    print('var edges = new vis.DataSet([')
+    for cid, v in multidict_to_pairs(read_json_to_dict(REVERSE_KDAM_FILENAME)):
+        if cid.startswith('23'):
+            cid, v = int(cid), int(v)
+            print('{', 'from: {}, to: {}, arrows: "to"'.format(cid, v), '},')
+    print(']);')
+
+def nodes_to_visDataSet():
+    print('var nodes = new vis.DataSet([')
+    for cid, details in sorted(read_json_to_dict(filename=COURSE_LIST_FILENAME).items()):
+        if cid.startswith('23'):
+            print('{', 'id:{}, group: {g}, label: {name}, title: "{number}"'.format(
+                       cid, g=cid[2], name=repr(textwrap.fill(details['name'], 25)), number=cid), '},')
+    print(']);')
+
 if __name__ == '__main__':
-    for k, v in multidict_to_pairs(read_json_to_dict(REVERSE_ADJACENT_FILENAME)):
-        if k.startswith('234') or v.startswith('234'):
-            k, v = int(k), int(v)
-            print('{', 'from: {}, to: {}, arrows: "to",  dashes:true'.format(k, v), '},')
-        
+    #kdam_to_visDataSet()
+    nodes_to_visDataSet()  
