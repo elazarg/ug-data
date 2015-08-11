@@ -2,6 +2,7 @@ import json
 import itertools as it
 from collections import defaultdict
 import textwrap
+from itertools import chain
 
 COURSE_LIST_FILENAME = 'course_list.json'
 REVERSE_KDAM_FILENAME = 'reverse_kdam.json'
@@ -17,7 +18,7 @@ def flatten(v, field):
 
 
 def to_jsonable(d):
-    return {k:list(sorted(set(v))) for k,v in d.items()}
+    return {k:list(sorted(set(v))) for k, v in d.items()}
 
 
 def multidict(pairs):
@@ -35,7 +36,7 @@ def merge_mutildicts(d1, d2):
 
 
 def multidict_to_pairs(d):
-    return it.chain.from_iterable(it.product([k], v) for k,v in d.items())
+    return it.chain.from_iterable(it.product([k], v) for k, v in d.items())
 
 def get_reverse_kdam_from_course_list(field='kdam', filename=COURSE_LIST_FILENAME):
     d = read_json_to_dict(filename)
@@ -50,7 +51,7 @@ def read_kdam_and_adjacent():
 
 
 def dump_json_kdam(d):
-    s = ',\n'.join('{}: {}'.format(repr(k), repr(v)) for k,v in sorted(d.items()))
+    s = ',\n'.join('{}: {}'.format(repr(k), repr(v)) for k, v in sorted(d.items()))
     return ('{\n%s\n}' % s.replace("'", '"'))
 
 
@@ -58,23 +59,47 @@ def print_to_file(filename, field):
     with open(filename, 'w') as f:
         f.write(dump_json_kdam(get_reverse_kdam_from_course_list(field)))
 
+def is_cs(cid):
+    return 234000 <= int(cid) <= 236999
 
-def kdam_to_visDataSet():
-    print('var edges = new vis.DataSet([')
-    for cid, v in multidict_to_pairs(read_json_to_dict(REVERSE_KDAM_FILENAME)):
-        if cid.startswith('23'):
-            cid, v = int(cid), int(v)
-            print('{', 'from: {}, to: {}, arrows: "to"'.format(cid, v), '},')
-    print(']);')
-
-def nodes_to_visDataSet():
-    print('var nodes = new vis.DataSet([')
-    for cid, details in sorted(read_json_to_dict(filename=COURSE_LIST_FILENAME).items()):
-        if cid.startswith('23'):
-            print('{', 'id:{}, group: {g}, label: {name}, title: "{number}"'.format(
-                       cid, g=cid[2], name=repr(textwrap.fill(details['name'], 25)), number=cid), '},')
-    print(']);')
+def nodes_to_visDataSet(fp):
+    from functools import partial
+    
+    pr = partial(print, file=fp)
+    pr('var nodes = new vis.DataSet([')
+    edges = defaultdict(set)
+    d = read_json_to_dict(filename=COURSE_LIST_FILENAME)
+    for cid, details in sorted(d.items()):
+        cid = int(cid)
+        if not is_cs(cid):
+            continue
+        for k in details.get('kdam', []):
+            if len(k) > 1:
+                dummy = 1000000 + sum(map(int, k))
+                if dummy not in edges:
+                    pr('{', 'id:"{}", group: 9, hidden: true'.format(dummy), '},')
+                edges[dummy].add(cid)
+                for p in k:
+                    edges[p].add(dummy)
+            else:
+                edges[k[0]].add(cid)
+    for cid in {int(x) for x in (set(chain.from_iterable(edges.values())) | set(edges))}:
+        cid = int(cid)
+        if cid < 1000000:
+            details = d.get(str(cid).zfill(6))
+            if details is None:
+                pr('{', 'id:"{0}", group: 10, label: {0}, title: "{0}", mass:1'.format(cid), '},')
+            else:
+                name = repr(textwrap.fill(details['name'], 25))
+                pr('{', 'id:"{}", group: {g}, label: {name}, title: "{number}"'.format(
+                       cid, g=str(cid)[-4], name=name, number=cid), '},')
+    pr(']);')
+    
+    pr('var edges = new vis.DataSet([')
+    for cid, v in multidict_to_pairs(edges):
+        pr('{', 'from: {}, to: {}'.format(cid, v), '},')
+    pr(']);')
 
 if __name__ == '__main__':
-    #kdam_to_visDataSet()
-    nodes_to_visDataSet()  
+    with open(r'..\ug-data-vis\data.js', 'w', encoding='utf8') as fp:
+        nodes_to_visDataSet(fp)
