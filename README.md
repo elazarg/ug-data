@@ -17,3 +17,33 @@ such as [Ruby](https://hackhands.com/ruby-read-json-file-hash/).
 Note - the file is `utf-8`, not `ascii`.
 
 As can be seen from the code, the data was extracted directly from the [UG-site](https://ug3.technion.ac.il/rishum/search), but this is not an official project, in any sense; the data might contain errors.
+
+Example for a single fetch:
+
+```
+$ python3 ug_fetch.py 234123
+{
+  "id": "234123",
+  "points": "4.5",
+  "name": "מערכות הפעלה",
+  "lecture": "2",
+  "tutorial": "2",
+  "lab": "3",
+  "project": "6",
+  "kdam": [
+    [
+      "234218",
+      "234118"
+    ]
+  ],
+  "no_more": [
+    "236364",
+    "234120",
+    "234119",
+    "046210",
+    "046209"
+  ],
+  "site": "http://www.cs.technion.ac.il/~cs234123/index.html",
+  "syllabus": "הקורס מציג את הנושאים המרכזיים של מערכות הפעלה מודרניות, ובפרט: תהליכים וחוטים: זימון והחלפת הקשר, תיאום: בעיית הקטע הקריטי, סמפורים ומשתני תנאי, פסיקות, ניהול זיכרון: דפדוף, זיכרון וירטואלי, מערכת הקבצים. במסגרת התרגול, הסטודנטים יכנסו לעומקה של מערכת הפעלה מתקדמת."
+}
+```
