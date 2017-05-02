@@ -2,7 +2,7 @@
 This project is about publishing Technion UG courses information in a machine-friendly manner. 
 
 The code here is not important. Really. It's all about the data.
-[`course_list.json`](course_list.json) is a valid [JSON](https://en.wikipedia.org/wiki/JSON#Example) file containing information about courses in the Technion. Please take a look at it: as a JSON file, it's human-readable. Another interesting files are [`reverse_kdam.json`](reverse_kdam.json) and [`reverse_adjacent.json`](reverse_adjacent.json).
+[`course_list.json`](output/course_list.json) is a valid [JSON](https://en.wikipedia.org/wiki/JSON#Example) file containing information about courses in the Technion. Please take a look at it: as a JSON file, it's human-readable. Another interesting files are [`reverse_kdam.json`](output/reverse_kdam.json) and [`reverse_adjacent.json`](output/reverse_adjacent.json).
 
 JSON is also machine-readable, of course. To read this file and use it in your program, simply load it as a JSON file. For example, in Python your code can be:
 
